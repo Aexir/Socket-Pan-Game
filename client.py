@@ -1,3 +1,6 @@
+#  Maciej Dąbkowski
+#  WCY19IJ3S1
+
 import pygame
 
 from network_client import *
@@ -10,7 +13,6 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 window.fill((255, 255, 255))
 pygame.display.set_caption("Pan Client")
 network = None
-
 
 
 class Button:
@@ -29,13 +31,6 @@ class Button:
         window.blit(txt, (self.x + round(self.width / 2) - round(txt.get_width() / 2),
                           (self.y - self.height) + round((self.y - self.height) / 2) - round(txt.get_height() / 2)))
 
-    def drawStart(self, window):
-        pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
-        font = pygame.font.SysFont('Arial', 40)
-        txt = font.render(self.txt, True, (255, 255, 255))
-        window.blit(txt, (self.x + round(self.width / 2) - round(txt.get_width() / 2),
-                          self.y + round(self.height / 2) - round(txt.get_height() / 2)))
-
     def btnClick(self, pos):
         return self.x <= pos[0] <= self.x + self.width and \
                (self.y - self.height) <= pos[1] <= (self.y - self.height) + self.height
@@ -48,19 +43,23 @@ class Card:
         self.nr = nr
         self.x = (50 * self.nr) * 1.4 + 30
         self.y = window.get_height() * 0.6
-        self.img = pygame.image.load(f'img\{self.suit}{self.type}.png')
+        self.img = pygame.image.load(f'img/{self.suit}{self.type}.png')
         self.img = pygame.transform.scale(self.img, (60, self.img.get_height() * 0.40))
 
     def draw(self, window):
         pygame.draw.rect(window, (0, 0, 255), (self.x, self.y, self.img.get_width() + 2, self.img.get_height() + 2))
         window.blit(self.img, (self.x, self.y))
 
+    def draw2(self, window):
+        img = pygame.transform.scale(self.img, (134, 184))
+        window.blit(img, (434, 116))
+
     def get_img(self):
         return self.img
 
     def btnClick(self, pos):
         return self.x <= pos[0] <= self.x + self.img.get_width() and \
-               self.y <= pos[1] <= self.y + self.img.get_height(), print(self.suit, self.type)
+               self.y <= pos[1] <= self.y + self.img.get_height()
 
     def get_card(self):
         print(f'{self.x}, {self.y} : {self.suit}, {self.type}')
@@ -103,13 +102,12 @@ def menu():
                     print("BRAK WOLNEGO SERWERA")
 
 
-def redraw_window(window, game, player, cards, button):
+def redraw_window(window, game, player, cards, button, cardDeck):
     window.fill((255, 255, 255))
     font = pygame.font.SysFont("comicsans", 40)
 
     for card in cards:
         card.draw(window)
-        # print(card.get_card())
 
     if game.get_turn() == 0:
         text1 = font.render("Zaczyna gracz z [9 Kier]", True, (0, 0, 0))
@@ -120,7 +118,12 @@ def redraw_window(window, game, player, cards, button):
         text1 = font.render(f"Ruch gracza {game.get_turn()}", True, (255, 0, 0))
     window.blit(text1, (window.get_width() / 2 - text1.get_width() / 2, 20))
 
-    button.draw(window)
+    if len(cardDeck) == 0:
+        button.draw(window)
+    else:
+        for card in cardDeck:
+            card.draw2(window)
+            print(card.get_card())
     pygame.display.update()
 
 
@@ -139,11 +142,7 @@ def main():
         try:
             game = network.send_data("update")
             cardStack = [Card(item, index) for index, item in enumerate(game.get_player(player).get_cards())]
-
-            for card in cardStack:
-                print(card.get_card())
-
-            print("")
+            cardDeck = [Card(item, index) for index, item in enumerate(game.deck)]
         except:
             run = False
             print("Couldnt update game")
@@ -156,10 +155,9 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 print(f'START {button.btnClick(pygame.mouse.get_pos())}')
 
-
                 for card in cardStack:
                     if card.btnClick(pygame.mouse.get_pos()):
-                        print("ELO")
+                        print(f"KARTA {card.get_card()}")
                     else:
                         print("NIE")
             if event.type == pygame.MOUSEBUTTONUP:
@@ -167,7 +165,7 @@ def main():
 
         # p.move()
         if game is not None:
-            redraw_window(window, game, player, cardStack, button)
+            redraw_window(window, game, player, cardStack, button, cardDeck)
 
 
 menu()

@@ -1,3 +1,6 @@
+#  Maciej Dąbkowski
+#  WCY19IJ3S1
+
 import socket
 import pickle
 
@@ -6,7 +9,7 @@ class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.ip = "127.0.0.1"
-        self.port = 2137
+        self.port = 2138
         self.id = self.connect()
         print(self.id)
 

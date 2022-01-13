@@ -1,9 +1,10 @@
-# Maciej Dąbkowski WCY19IJ3S1
+#  Maciej Dąbkowski
+#  WCY19IJ3S1
 
 import server
 
 IP = "127.0.0.1"
-PORT = 2137
+PORT = 2138
 MAX_CONNECTIONS = 4
 
 if __name__ == '__main__':

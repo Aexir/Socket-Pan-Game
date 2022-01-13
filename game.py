@@ -1,3 +1,6 @@
+#  Maciej Dąbkowski
+#  WCY19IJ3S1
+
 import random
 from itertools import product
 from collections import deque
@@ -13,7 +16,7 @@ class Game:
     def __init__(self):
         self.ready = False
         self.deck = deque()
-
+        self.deck = cards[:3]
         self.p1_deck = cards[:6]
         self.p2_deck = cards[6:12]
         self.p3_deck = cards[12:18]
@@ -32,8 +35,18 @@ class Game:
     def get_player(self, id):
         return self.players[id - 1]
 
-    def move(self):
-        pass
+    def move(self, newCard):
+
+        self.deck.appendleft(newCard)
+        if newCard[1] == '♠':
+            if self.turn == 1:
+                self.turn = 4
+            else:
+                self.turn -= 1
+        else:
+            if self.turn == 4:
+                self.turn = 1
+            else: self.turn += 1
 
     def select(self):
         changed = False

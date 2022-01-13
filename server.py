@@ -1,5 +1,7 @@
+#  Maciej Dąbkowski
+#  WCY19IJ3S1
+
 import pickle
-import random
 import socket
 from _thread import *
 
@@ -11,7 +13,7 @@ class Server:
         self.IP = ip
         self.PORT = port
         self.MAX_CONNECTIONS = max_connections
-        self.clients = set()
+        #self.clients = set()
         self.game = None
         self.idCount = 0
 
@@ -21,6 +23,8 @@ class Server:
             server.listen()
 
             print(f"Server started at {self.IP}:{self.PORT}")
+            print("Creating a new game...")
+            self.game = Game()
 
             while True:
                 if self.idCount < 4:
@@ -29,13 +33,9 @@ class Server:
                     print(f'Connection from: {addr}')
                     self.idCount += 1
 
-                    print("Creating a new game...")
-                    self.game = Game()
-                    print("Starting a new game...")
-
-                    #zmienic na 4
+                    # zmienic na 4
                     if self.idCount == 1:
-
+                        print("Starting a new game...")
                         self.game.ready = True
 
                     start_new_thread(self.client_thread, (conn, self.idCount))
@@ -54,12 +54,10 @@ class Server:
             except socket.error as error:
                 print(f'Error: {error}')
 
-        '''
         try:
-            del self.game
+            #del self.game
             print("Deleting game")
-        except :
+        except:
             pass
         self.idCount -= 1
         connection.close()
-        '''
