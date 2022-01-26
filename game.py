@@ -133,5 +133,3 @@ class Player:
             if card.getSuit() == suit:
                 if card.getType() == type:
                     return index
-
-

@@ -179,17 +179,17 @@ def main():
                     for card in cardStack:
                         if card.btnClick(pygame.mouse.get_pos()):
                             index = game.players[player-1].get_card_index(card.get_card()[0], card.get_card()[1])
-                            game.players[player-1].cards[index].setSelected()
+                            network.send_data("select " + str(index))
+                            #network.send_data(game.players[player-1].cards[index].setSelected())
                             print(game.players[player-1].cards[index].isSelected())
                             #print(f'{card.get_card()[0]}, {card.get_card()[1]}  {card.isSelected()}')
                         else:
                             pass
                             #print("NIE")
+                for card in game.players[player-1].cards:
+                    print(f"SELECTED {card.isSelected()}")
 
-            if event.type == pygame.MOUSEBUTTONUP:
-                for card in cardStack:
-                    #print(card.isSelected())
-                    pass
+            #if event.type == pygame.MOUSEBUTTONUP:
 
         if game is not None:
             redraw_window(window, game, player, cardStack, button, cardDeck, button2)

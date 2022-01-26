@@ -46,6 +46,12 @@ class Server:
             try:
                 data = connection.recv(4096).decode()
                 if data:
+                    if data.count("select") > 0:
+                        all = data.split(" ")
+                        index = int(all[1])
+
+                        self.game.players[player-1].cards[index].setSelected()
+
                     connection.sendall(pickle.dumps(self.game))
                 else:
                     print('Disconnected')
