@@ -51,29 +51,32 @@ class Server:
                         index = int(all[1])
 
                         tmpCard = self.game.players[player-1].cards[index]
-                        legal = self.game.isLegal(tmpCard)
-                        if legal:
+                        if self.game.isLegal(tmpCard):
                             self.game.players[player - 1].cards[index].setSelected()
+                            self.game.players[player - 1].selected_cards.append(
+                                self.game.players[player - 1].cards[index])
+                            if not self.game.legal(player)[0]:
+                                self.game.players[player-1].cards[index].setSelected()
+                                index2 = self.game.players[player - 1].get_selected_card_index(
+                                    self.game.players[player-1].cards[index].getSuit(),
+                                    self.game.players[player-1].cards[index].getType())
+                                del self.game.players[player - 1].selected_cards[index2]
                         else:
                             print(f"{player} NIEDOZWOLONY RUCH")
                     if data == "confirm":
                         print("ODEBRANO CONFIRM")
                         if self.game.turn == 0:
                             if len(self.game.players[player-1].get_selected_cards()) != 0:
-                                card = self.game.players[player-1].get_selected_cards()
-                                card1 = card[0]
-                                self.game.move(player, card1)
-                            else:
-                                print("BRAK ZAZNACZONYCH KART")
+                                self.game.update(player)
                         else:
                             if len(self.game.players[player - 1].get_selected_cards()) != 0:
-                                cards = self.game.players[player - 1].get_selected_cards()
-                                for card in cards:
-                                    self.game.move(player, card)
+                                self.game.update(player)
                             else:
                                 print("BRAK ZAZNACZONYCH KART")
                     if data == "get3cards":
                         self.game.get3Cards(player)
+                        self.game.setNextPlayer(player)
+
                     connection.sendall(pickle.dumps(self.game))
                 else:
                     print('Disconnected')

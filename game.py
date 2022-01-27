@@ -10,6 +10,7 @@ card_types = ["9", "10", "J", "Q", "K", "A"]
 
 # random.shuffle(cards)
 
+
 class Card:
     def __init__(self, type, suit):
         self.suit = type
@@ -43,9 +44,8 @@ class Game:
         cards = [Card(x[0], x[1]) for x in [x for x in product(card_types, card_suits)]]
         self.ready = False
         self.deck = deque()
-        #self.deck = cards[:24]
         self.turn = 0
-        self.players = [Player(cards[:10], 1), Player(cards[6:12], 2),
+        self.players = [Player(cards[:6], 1), Player(cards[6:12], 2),
                         Player(cards[12:18], 3), Player(cards[18:24], 4)]
 
     def getStartingPlayer(self):
@@ -90,11 +90,24 @@ class Game:
     def get3Cards(self, player):
         for x in range(3):
             if (self.deck.__getitem__(0).getSuit() == '9') and (self.deck.__getitem__(0).getType() == '♥'):
-                return
+                break
             else:
                 self.players[player - 1].cards.append(self.deck.popleft())
 
         self.setNextPlayer(player)
+
+    def legal(self, player):
+        cards = self.players[player - 1].get_selected_cards()
+        count = 0
+        if len(cards) > 1:
+            typ = cards[0].getSuit()
+            for card in cards:
+                print(card.getSuit())
+                if card.getSuit() == typ:
+                    count += 1
+        else:
+            return True, 1
+        return count == len(cards), count
 
     def setNextPlayer(self, player):
         if self.deck.__getitem__(0).getType() == '♠':
@@ -108,23 +121,25 @@ class Game:
             else:
                 self.turn += 1
 
+    def update(self, player):
+        val = self.legal(player)[1]
+        if (val == 1) or (val == 4):
+            cards = self.players[player - 1].get_selected_cards()
+            for x in range(val):
+                print(cards[x].getSuit())
+                self.move(player, cards[x])
+            self.setNextPlayer(player)
+
+
     def move(self, player, newCard):
         if self.isLegal(newCard):
             if self.turn == 0:
                 self.turn = self.getStartingPlayer()
             self.deck.appendleft(newCard)
-            index = self.players[player-1].get_card_index(newCard.getSuit(), newCard.getType())
-            del self.players[player-1].cards[index]
-            if newCard.getType() == '♠':
-                if self.turn == 1:
-                    self.turn = 4
-                else:
-                    self.turn -= 1
-            else:
-                if self.turn == 4:
-                    self.turn = 1
-                else:
-                    self.turn += 1
+            index = self.players[player - 1].get_card_index(newCard.getSuit(), newCard.getType())
+            index2 = self.players[player - 1].get_selected_card_index(newCard.getSuit(), newCard.getType())
+            del self.players[player - 1].selected_cards[index2]
+            del self.players[player - 1].cards[index]
 
     def reset_players(self):
         for player in self.players:
@@ -136,6 +151,7 @@ class Player:
         self.cards = cards
         self.id = id
         self.finished = False
+        self.selected_cards = deque()
 
     def get_id(self):
         return self.id
@@ -145,6 +161,13 @@ class Player:
 
     def get_card_index(self, suit, type):
         for index, card in enumerate(self.cards):
+            if card.getSuit() == suit:
+                if card.getType() == type:
+                    return index
+
+
+    def get_selected_card_index(self, suit, type):
+        for index, card in enumerate(self.selected_cards):
             if card.getSuit() == suit:
                 if card.getType() == type:
                     return index
