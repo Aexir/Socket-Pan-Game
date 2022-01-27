@@ -48,7 +48,7 @@ class Card:
         self.y = window.get_height() * 0.6
         self.img = pygame.image.load(f'img/{self.suit}{self.type}.png')
         self.img = pygame.transform.scale(self.img, (60, self.img.get_height() * 0.40))
-        #self.x = (window.get_width()/2 - (self.nr * self.img.get_width()/2)) + (50 * self.nr) * 1.4 + 30
+        # self.x = (window.get_width()/2 - (self.nr * self.img.get_width()/2)) + (50 * self.nr) * 1.4 + 30
 
     def draw(self, window):
         if self.selected:
@@ -58,7 +58,7 @@ class Card:
             pygame.draw.rect(window, (0, 0, 255),
                              (self.x - 2, self.y - 2, self.img.get_width() + 2, self.img.get_height() + 2))
 
-        window.blit(self.img,  (self.x, self.y))
+        window.blit(self.img, (self.x, self.y))
 
     def isSelected(self):
         return self.selected
@@ -69,8 +69,9 @@ class Card:
             window.blit(img, (434, 116))
         else:
             pygame.draw.rect(window, (0, 0, 0),
-                             (30 * self.nr + 70 - 2, 116 - 2, img.get_width() + 2, img.get_height() + 2))
-            window.blit(img, (30 * self.nr + 70, 116))
+                             (30 * (-self.nr) + window.get_width() / 2 - 2, 116 - 2, img.get_width() + 2,
+                              img.get_height() + 2))
+            window.blit(img, (30 * (-self.nr) + window.get_width() / 2, 116))
 
     def get_img(self):
         return self.img
@@ -145,12 +146,12 @@ def redraw_window(window, game, player, cards, button, cardDeck, button2, button
     if len(cardDeck) == 0:
         button.draw(window)
     else:
-       # imt = pygame.image.load(f'img/card.png')
-        #img = pygame.transform.scale(imt, (138, 188))
-        #window.blit(img, (434, 300-188))
+        # imt = pygame.image.load(f'img/card.png')
+        # img = pygame.transform.scale(imt, (138, 188))
+        # window.blit(img, (434, 300-188))
         for card in cardDeck:
             card.draw2(window)
-            #print(card.get_card())
+            # print(card.get_card())
     pygame.display.update()
 
 
@@ -171,7 +172,7 @@ def main():
         try:
             game = network.send_data("update")
             cardStack = [Card(item, index) for index, item in enumerate(game.get_player(player).cards)]
-            cardDeck = [Card(item, index) for index, item in enumerate(game.deck)]
+            cardDeck = [Card(item, index) for index, item in reversed(list(enumerate(game.deck)))]
         except:
             run = False
             print("Couldnt update game")

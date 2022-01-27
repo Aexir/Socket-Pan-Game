@@ -21,11 +21,9 @@ class Server:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
             server.bind((self.IP, self.PORT))
             server.listen()
-
             print(f"Server started at {self.IP}:{self.PORT}")
             print("Creating a new game...")
             self.game = Game()
-
             while True:
                 if self.idCount < 4:
                     conn, addr = server.accept()
@@ -50,14 +48,14 @@ class Server:
                         all = data.split(" ")
                         index = int(all[1])
 
-                        tmpCard = self.game.players[player-1].cards[index]
-                        print(f"TMPCARD {tmpCard.getSuit()} {tmpCard.getType()}")
+                        tmpCard = self.game.players[player - 1].cards[index]
+                        # print(f"TMPCARD {tmpCard.getSuit()} {tmpCard.getType()}")
                         if self.game.isLegal(tmpCard):
-                            if not self.game.players[player-1].cards[index].selected:
+                            if not self.game.players[player - 1].cards[index].selected:
                                 self.game.players[player - 1].cards[index].selected = True
 
                                 self.game.players[player - 1].selected_cards.append(
-                                self.game.players[player - 1].cards[index])
+                                    self.game.players[player - 1].cards[index])
 
                             else:
                                 self.game.players[player - 1].cards[index].selected = False
@@ -67,16 +65,16 @@ class Server:
                                 del self.game.players[player - 1].selected_cards[index2]
 
                             if not self.game.legal(player)[0]:
-                                self.game.players[player-1].cards[index].setSelected()
+                                self.game.players[player - 1].cards[index].setSelected()
                                 index2 = self.game.players[player - 1].get_selected_card_index(
-                                    self.game.players[player-1].cards[index].getSuit(),
-                                    self.game.players[player-1].cards[index].getType())
+                                    self.game.players[player - 1].cards[index].getSuit(),
+                                    self.game.players[player - 1].cards[index].getType())
                                 del self.game.players[player - 1].selected_cards[index2]
                         else:
                             print(f"{player} NIEDOZWOLONY RUCH")
                     if data == "confirm":
                         if self.game.turn == 0:
-                            if len(self.game.players[player-1].get_selected_cards()) != 0:
+                            if len(self.game.players[player - 1].get_selected_cards()) != 0:
                                 self.game.update(player)
                         else:
                             if len(self.game.players[player - 1].get_selected_cards()) != 0:
