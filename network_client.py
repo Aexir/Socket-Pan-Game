@@ -1,8 +1,8 @@
 #  Maciej Dąbkowski
 #  WCY19IJ3S1
 
-import socket
 import pickle
+import socket
 
 
 class Network:

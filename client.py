@@ -43,11 +43,12 @@ class Card:
         self.nr = nr
         self.x = (50 * self.nr) * 1.4 + 30
 
-        #print(f'XXX {card.getSuit()}, {card.getType()}{card.isSelected()}')
+        # print(f'XXX {card.getSuit()}, {card.getType()}{card.isSelected()}')
         self.selected = card.isSelected()
         self.y = window.get_height() * 0.6
         self.img = pygame.image.load(f'img/{self.suit}{self.type}.png')
         self.img = pygame.transform.scale(self.img, (60, self.img.get_height() * 0.40))
+        #self.x = (window.get_width()/2 - (self.nr * self.img.get_width()/2)) + (50 * self.nr) * 1.4 + 30
 
     def draw(self, window):
         if self.selected:
@@ -56,16 +57,20 @@ class Card:
         else:
             pygame.draw.rect(window, (0, 0, 255),
                              (self.x - 2, self.y - 2, self.img.get_width() + 2, self.img.get_height() + 2))
-        window.blit(self.img, (self.x, self.y))
 
+        window.blit(self.img,  (self.x, self.y))
 
     def isSelected(self):
         return self.selected
 
-
     def draw2(self, window):
         img = pygame.transform.scale(self.img, (134, 184))
-        window.blit(img, (434, 116))
+        if (self.suit == '9') and (self.type == '♥'):
+            window.blit(img, (434, 116))
+        else:
+            pygame.draw.rect(window, (0, 0, 0),
+                             (30 * self.nr + 70 - 2, 116 - 2, img.get_width() + 2, img.get_height() + 2))
+            window.blit(img, (30 * self.nr + 70, 116))
 
     def get_img(self):
         return self.img
@@ -75,7 +80,7 @@ class Card:
                self.y <= pos[1] <= self.y + self.img.get_height()
 
     def get_card(self):
-        #(f'{self.x}, {self.y} : {self.suit}, {self.type}')
+        # (f'{self.x}, {self.y} : {self.suit}, {self.type}')
         return self.suit, self.type
 
 
@@ -116,8 +121,8 @@ def menu():
                     print("BRAK WOLNEGO SERWERA")
 
 
-def redraw_window(window, game, player, cards, button, cardDeck, button2):
-    window.fill((255, 255, 255))
+def redraw_window(window, game, player, cards, button, cardDeck, button2, button3):
+    window.fill((7, 63, 24))
     font = pygame.font.SysFont("Arial", 40)
 
     for card in cards:
@@ -135,21 +140,26 @@ def redraw_window(window, game, player, cards, button, cardDeck, button2):
     window.blit(text1, (window.get_width() / 2 - text1.get_width() / 2, 20))
 
     button2.draw(window)
+    button3.draw(window)
+
     if len(cardDeck) == 0:
         button.draw(window)
     else:
+       # imt = pygame.image.load(f'img/card.png')
+        #img = pygame.transform.scale(imt, (138, 188))
+        #window.blit(img, (434, 300-188))
         for card in cardDeck:
             card.draw2(window)
-            print(card.get_card())
+            #print(card.get_card())
     pygame.display.update()
 
 
 def main():
     global network
     run = True
-    # p = Player(50, 50, 10, 10, (0, 255, 0), 0)
     button = Button("START", 434, 300, (0, 0, 0), 132, 187)
     button2 = Button("Wez 3 karty", 0, window.get_height() - 100, (0, 0, 0), window.get_width(), 50)
+    button3 = Button("Zatwierdz ruch", 0, window.get_height() - 25, (0, 0, 0), window.get_width(), 50)
 
     clock = pygame.time.Clock()
     player = int(network.get_id())
@@ -172,25 +182,26 @@ def main():
                 run = False
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                #print(f'START {button.btnClick(pygame.mouse.get_pos())}')
-                #print(f'3KARTY {button.btnClick(pygame.mouse.get_pos())}')
-                #print(f"TURN {game.get_turn} PLAYER {player} STARTING {game.getStartingPlayer()}")
-                if game.get_turn() == 0 and (player == game.getStartingPlayer()):
+                pos = pygame.mouse.get_pos()
+                if (game.get_turn() == 0) and (player == game.getStartingPlayer()):
                     for card in cardStack:
-                        if card.btnClick(pygame.mouse.get_pos()):
-                            index = game.players[player-1].get_card_index(card.get_card()[0], card.get_card()[1])
+                        if card.btnClick(pos):
+                            index = game.players[player - 1].get_card_index(card.get_card()[0], card.get_card()[1])
                             network.send_data("select " + str(index))
-                            #network.send_data(game.players[player-1].cards[index].setSelected())
-                            print(game.players[player-1].cards[index].isSelected())
-                            #print(f'{card.get_card()[0]}, {card.get_card()[1]}  {card.isSelected()}')
-                        else:
-                            pass
-                            #print("NIE")
-                for card in game.players[player-1].cards:
-                    print(f"SELECTED {card.isSelected()}")
-
-            #if event.type == pygame.MOUSEBUTTONUP:
+                    if button3.btnClick(pos):
+                        network.send_data("confirm")
+                if game.get_turn() == player:
+                    for card in cardStack:
+                        if card.btnClick(pos):
+                            index = game.players[player - 1].get_card_index(card.get_card()[0], card.get_card()[1])
+                            network.send_data("select " + str(index))
+                    if button3.btnClick(pos):
+                        network.send_data("confirm")
+                    if button2.btnClick(pos):
+                        network.send_data("get3cards")
 
         if game is not None:
-            redraw_window(window, game, player, cardStack, button, cardDeck, button2)
+            redraw_window(window, game, player, cardStack, button, cardDeck, button2, button3)
+
+
 menu()

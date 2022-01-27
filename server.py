@@ -13,7 +13,7 @@ class Server:
         self.IP = ip
         self.PORT = port
         self.MAX_CONNECTIONS = max_connections
-        #self.clients = set()
+        # self.clients = set()
         self.game = None
         self.idCount = 0
 
@@ -50,8 +50,30 @@ class Server:
                         all = data.split(" ")
                         index = int(all[1])
 
-                        self.game.players[player-1].cards[index].setSelected()
-
+                        tmpCard = self.game.players[player-1].cards[index]
+                        legal = self.game.isLegal(tmpCard)
+                        if legal:
+                            self.game.players[player - 1].cards[index].setSelected()
+                        else:
+                            print(f"{player} NIEDOZWOLONY RUCH")
+                    if data == "confirm":
+                        print("ODEBRANO CONFIRM")
+                        if self.game.turn == 0:
+                            if len(self.game.players[player-1].get_selected_cards()) != 0:
+                                card = self.game.players[player-1].get_selected_cards()
+                                card1 = card[0]
+                                self.game.move(player, card1)
+                            else:
+                                print("BRAK ZAZNACZONYCH KART")
+                        else:
+                            if len(self.game.players[player - 1].get_selected_cards()) != 0:
+                                cards = self.game.players[player - 1].get_selected_cards()
+                                for card in cards:
+                                    self.game.move(player, card)
+                            else:
+                                print("BRAK ZAZNACZONYCH KART")
+                    if data == "get3cards":
+                        self.game.get3Cards(player)
                     connection.sendall(pickle.dumps(self.game))
                 else:
                     print('Disconnected')
@@ -61,7 +83,7 @@ class Server:
                 print(f'Error: {error}')
 
         try:
-            #del self.game
+            # del self.game
             print("Deleting game")
         except:
             pass
