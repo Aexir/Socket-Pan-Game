@@ -51,6 +51,7 @@ class Server:
                         index = int(all[1])
 
                         tmpCard = self.game.players[player-1].cards[index]
+                        print(f"TMPCARD {tmpCard.getSuit()} {tmpCard.getType()}")
                         if self.game.isLegal(tmpCard):
                             if not self.game.players[player-1].cards[index].selected:
                                 self.game.players[player - 1].cards[index].selected = True
@@ -74,7 +75,6 @@ class Server:
                         else:
                             print(f"{player} NIEDOZWOLONY RUCH")
                     if data == "confirm":
-                        print("ODEBRANO CONFIRM")
                         if self.game.turn == 0:
                             if len(self.game.players[player-1].get_selected_cards()) != 0:
                                 self.game.update(player)
@@ -84,8 +84,9 @@ class Server:
                             else:
                                 print("BRAK ZAZNACZONYCH KART")
                     if data == "get3cards":
-                        self.game.get3Cards(player)
-                        self.game.setNextPlayer(player)
+                        if len(self.game.deck) > 1:
+                            self.game.get3Cards(player)
+                            self.game.setNextPlayer(player)
 
                     connection.sendall(pickle.dumps(self.game))
                 else:

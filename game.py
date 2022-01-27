@@ -18,7 +18,7 @@ class Card:
         self.selected = False
 
     def get_card(self):
-        print(f'CREATE CARD {self.suit}, {self.type}{self.selected}')
+        #print(f'CREATE CARD {self.suit}, {self.type}{self.selected}')
         return self.__class__
 
     def getSuit(self):
@@ -33,10 +33,10 @@ class Card:
     def setSelected(self):
         if self.selected:
             self.selected = False
-            print(f"SELECTED {self.selected} {self.type} {self.suit}")
+            #print(f"SELECTED {self.selected} {self.type} {self.suit}")
         else:
             self.selected = True
-            print(f"SELECTED {self.selected} {self.type} {self.suit}")
+            #print(f"SELECTED {self.selected} {self.type} {self.suit}")
 
 
 class Game:
@@ -72,17 +72,21 @@ class Game:
             else:
                 return False
         else:
+            print("ISLEGAL2")
             card = self.deck
-            print(card[0].getSuit())
-            if card[0].getSuit() == 'A' and newCard.getSuit() == ("9" or "10" or "J" or "Q" or "K"):
+            #print(f'{card[0].getSuit()}{newCard.getSuit()}')
+            if (card[0].getSuit() == 'A') and newCard.getSuit() in ("9", "10","J","Q","K"):
+                print("A ZLE")
                 return False
-            elif card[0].getSuit() == 'K' and newCard.getSuit() == ("9" or "10" or "J" or "Q"):
+            if (card[0].getSuit() == 'K') and  newCard.getSuit() in ("9", "10","J","Q"):
+                print("K ZLE")
                 return False
-            elif card[0].getSuit() == 'Q' and newCard.getSuit() == ("9" or "10" or "J"):
+            if (card[0].getSuit() == 'Q') and newCard.getSuit() in ("9", "10","J"):
                 return False
-            elif card[0].getSuit() == 'J' and newCard.getSuit() == ("9" or "10"):
+            if (card[0].getSuit() == 'J') and newCard.getSuit() in ("9","10"):
+                print(f"J ZLE {newCard.getSuit()}")
                 return False
-            elif card[0].getSuit() == '10' and newCard.getSuit() == "9":
+            if (card[0].getSuit() == '10') and (newCard.getSuit() == "9"):
                 return False
             else:
                 return True
@@ -102,7 +106,6 @@ class Game:
         if len(cards) > 1:
             typ = cards[0].getSuit()
             for card in cards:
-                print(card.getSuit())
                 if card.getSuit() == typ:
                     count += 1
         else:
@@ -111,23 +114,25 @@ class Game:
 
     def setNextPlayer(self, player):
         inGameIndex = [x.get_id() for x in self.players if not x.has_finished()]
-
+        index = inGameIndex.index(player)
         if self.deck.__getitem__(0).getType() == '♠':
-            if player == 1:
-                self.turn = 4
+            if player == inGameIndex[0]:
+                self.turn = inGameIndex[len(inGameIndex) - 1]
             else:
-                self.turn -= 1
+                self.turn = inGameIndex[index-1]
         else:
-            if player == 4:
-                self.turn = 1
+            if player != inGameIndex[len(inGameIndex) - 1]:
+                self.turn = inGameIndex[index+1]
             else:
-                self.turn += 1
+                self.turn = inGameIndex[0]
 
     def update(self, player):
         val = self.legal(player)[1]
         if (val == 1) or (val == 4):
-            for card in self.players[player-1].selected_cards:
-                self.move(player, card)
+            for card in range(val):
+                print(card)
+                self.move(player, self.players[player-1].selected_cards[card])
+
             self.setNextPlayer(player)
             self.players[player-1].selected_cards.clear()
             for card in self.deck:
@@ -136,12 +141,16 @@ class Game:
                 self.get_player(player).finished = True
 
     def move(self, player, newCard):
-        if self.isLegal(newCard):
+        #if self.isLegal(newCard):
             if self.turn == 0:
                 self.turn = self.getStartingPlayer()
+            print("X")
             self.deck.appendleft(newCard)
+            print("Y")
             index = self.players[player - 1].get_card_index(newCard.getSuit(), newCard.getType())
+            print("Z")
             del self.players[player - 1].cards[index]
+            print("V")
 
 
     def reset_players(self):
