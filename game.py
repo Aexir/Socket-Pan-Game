@@ -110,6 +110,8 @@ class Game:
         return count == len(cards), count
 
     def setNextPlayer(self, player):
+        inGameIndex = [x.get_id() for x in self.players if not x.has_finished()]
+
         if self.deck.__getitem__(0).getType() == '♠':
             if player == 1:
                 self.turn = 4
@@ -124,12 +126,14 @@ class Game:
     def update(self, player):
         val = self.legal(player)[1]
         if (val == 1) or (val == 4):
-            cards = self.players[player - 1].get_selected_cards()
-            for x in range(val):
-                print(cards[x].getSuit())
-                self.move(player, cards[x])
+            for card in self.players[player-1].selected_cards:
+                self.move(player, card)
             self.setNextPlayer(player)
-
+            self.players[player-1].selected_cards.clear()
+            for card in self.deck:
+                card.selected = False
+            if len(self.get_player(player).cards) == 0:
+                self.get_player(player).finished = True
 
     def move(self, player, newCard):
         if self.isLegal(newCard):
@@ -137,9 +141,8 @@ class Game:
                 self.turn = self.getStartingPlayer()
             self.deck.appendleft(newCard)
             index = self.players[player - 1].get_card_index(newCard.getSuit(), newCard.getType())
-            index2 = self.players[player - 1].get_selected_card_index(newCard.getSuit(), newCard.getType())
-            del self.players[player - 1].selected_cards[index2]
             del self.players[player - 1].cards[index]
+
 
     def reset_players(self):
         for player in self.players:
@@ -165,7 +168,6 @@ class Player:
                 if card.getType() == type:
                     return index
 
-
     def get_selected_card_index(self, suit, type):
         for index, card in enumerate(self.selected_cards):
             if card.getSuit() == suit:
@@ -173,5 +175,4 @@ class Player:
                     return index
 
     def get_selected_cards(self):
-        selected = [x for x in self.cards if x.selected]
-        return selected
+        return self.selected_cards

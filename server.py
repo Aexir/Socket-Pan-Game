@@ -52,9 +52,19 @@ class Server:
 
                         tmpCard = self.game.players[player-1].cards[index]
                         if self.game.isLegal(tmpCard):
-                            self.game.players[player - 1].cards[index].setSelected()
-                            self.game.players[player - 1].selected_cards.append(
+                            if not self.game.players[player-1].cards[index].selected:
+                                self.game.players[player - 1].cards[index].selected = True
+
+                                self.game.players[player - 1].selected_cards.append(
                                 self.game.players[player - 1].cards[index])
+
+                            else:
+                                self.game.players[player - 1].cards[index].selected = False
+                                index2 = self.game.players[player - 1].get_selected_card_index(
+                                    self.game.players[player - 1].cards[index].getSuit(),
+                                    self.game.players[player - 1].cards[index].getType())
+                                del self.game.players[player - 1].selected_cards[index2]
+
                             if not self.game.legal(player)[0]:
                                 self.game.players[player-1].cards[index].setSelected()
                                 index2 = self.game.players[player - 1].get_selected_card_index(
