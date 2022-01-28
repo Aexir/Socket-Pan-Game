@@ -13,6 +13,7 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 window.fill((255, 255, 255))
 pygame.display.set_caption("Pan Client")
 network = None
+game = None
 
 
 class Button:
@@ -155,8 +156,32 @@ def redraw_window(window, game, player, cards, button, cardDeck, button2, button
     pygame.display.update()
 
 
+def end_screen():
+    show = True
+    window.fill((7, 63, 24))
+    player = int(network.get_id())
+    font = pygame.font.SysFont('Arial', 40)
+    msg = font.render("Koniec gry", True, (255, 255, 255))
+    window.blit(msg, (500 - msg.get_width() / 2, 200 - msg.get_height()))
+    if game.loser == player:
+        msg = font.render(f"PRZEGRALES", True, (255,0, 0))
+        window.blit(msg, (500 - msg.get_width() / 2, 250 - msg.get_height()))
+    else:
+        msg = font.render(f"Wygral gracz numer {game.winner}", True, (255, 255, 255))
+        window.blit(msg, (500 - msg.get_width() / 2, 250 - msg.get_height()))
+
+
+    while show:
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                show = False
+
+
 def main():
     global network
+    global game
     run = True
     button = Button("START", 434, 300, (0, 0, 0), 132, 187)
     button2 = Button("Wez 3 karty", 0, window.get_height() - 100, (0, 0, 0), window.get_width(), 50)
@@ -173,6 +198,9 @@ def main():
             game = network.send_data("update")
             cardStack = [Card(item, index) for index, item in enumerate(game.get_player(player).cards)]
             cardDeck = [Card(item, index) for index, item in reversed(list(enumerate(game.deck)))]
+            if game.finished:
+                run = False
+                end_screen()
         except:
             run = False
             print("Couldnt update game")

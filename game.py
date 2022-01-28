@@ -41,7 +41,9 @@ class Game:
         cards = [Card(x[0], x[1]) for x in [x for x in product(card_types, card_suits)]]
         random.shuffle(cards)
 
-        self.ready = False
+        self.finished = False
+        self.loser = None
+        self.winner = None
         self.deck = deque()
         self.turn = 0
         self.players = [Player(cards[:6], 1), Player(cards[6:12], 2),
@@ -53,14 +55,19 @@ class Game:
                 if (card.getSuit() == '9') and (card.getType() == '♥'):
                     return player.get_id()
 
-    def is_ready(self):
-        return self.ready
-
     def get_turn(self):
         return self.turn
 
     def get_player(self, id):
         return self.players[id - 1]
+
+
+    def check_finish(self):
+        finished = [x.get_id() for x in self.players if x.has_finished()]
+        if len(finished) == 3:
+            self.finished = True
+            self.winner = finished[0]
+
 
     def isLegal(self, newCard):
         if len(self.deck) == 0:
@@ -138,6 +145,10 @@ class Game:
                 card.selected = False
             if len(self.get_player(player).cards) == 0:
                 self.get_player(player).finished = True
+
+        self.check_finish()
+        if self.finished:
+            self.loser = player
 
     def move(self, player, newCard):
         # if self.isLegal(newCard):
