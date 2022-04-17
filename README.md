@@ -1,2 +1,2 @@
 # Socket-Pan-Game
-Simple multiplayer card game using sockets and pygame
+Multiplayer card game using sockets and pygame
